@@ -2,7 +2,8 @@
 // is a valid BIBD (using 2 unique approaches - by definition & by
 // a specific theorem (1.13))
 
-#include <matrix.h>
+#include "matrix.h"
+#include "validate.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -88,8 +89,8 @@ bool validate2(const struct Matrix *m)
     const struct Matrix *transpose = matrix_transpose(m);
     const struct Matrix *multiplied = matrix_multiply(m, transpose);
 
-    printf("resulting matrix:\n");
-    matrix_print(multiplied);
+    // printf("resulting matrix:\n");
+    // matrix_print(multiplied);
 
     int len = get_rows(m);
     int r = -1;
@@ -136,7 +137,7 @@ bool validate2(const struct Matrix *m)
     return matrix_equal(left_side, right_side);
 }
 
-int main()
+void check()
 {
     // the dimension of the matrix
     int rows, cols;

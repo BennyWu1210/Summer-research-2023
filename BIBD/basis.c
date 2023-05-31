@@ -22,7 +22,7 @@ int main()
         }
     }
 
-    struct Matrix *basis = get_basis(matrix);
+    struct Matrix *basis = get_row_basis(matrix);
     printf("The basis is: \n");
     matrix_print(basis);
 

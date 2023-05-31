@@ -1,4 +1,4 @@
-#include <matrix.h>
+#include "matrix.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -80,7 +80,7 @@ void matrix_insert(const struct Matrix *m, int i, int j, int value)
 
 void matrix_add(const struct Matrix *m, int i, int j, int value)
 {
-    m->data[i][j] += value;
+    m->data[i][j] ^= value;
 }
 
 struct Matrix *matrix_transpose(const struct Matrix *m)
@@ -170,80 +170,70 @@ int lcm(int a, int b)
     return a * b / abs(gcd(a, b));
 }
 
-// get_basis(m) finds the basis for the column space of m
-struct Matrix *get_basis(const struct Matrix *m)
+// get_row_basis(m) finds the basis for the column space of m
+struct Matrix *get_row_basis(const struct Matrix *m)
 {
     struct Matrix *new_m = matrix_dup(m);
-    // basically finding the RREF here (almost)
+    int basis_count = 0;
+    int rows = m->rows, cols = m->cols;
 
-    int pivots = 0;
-    for (int i = 0; i < new_m->rows && i < new_m->cols; i++)
+    for (int i = 0; i < cols; i++)
     {
-        int pivot_row = -1;
-
-        for (int j = i; j < new_m->rows; j++)
+        // See if a pivot element is found in this row
+        int pivot_pos = -1;
+        for (int j = 0; j < rows; j++)
         {
             if (get_value(new_m, j, i) != 0)
             {
-                pivot_row = j;
-                pivots++;
+                pivot_pos = j;
                 break;
             }
         }
 
-        if (pivot_row == -1)
-            continue;
-
-        // swap the rows if necessary
-        if (pivot_row != i)
+        // If a pivot column is found, elimnate other entries in that column
+        if (pivot_pos != -1)
         {
-            for (int j = 0; j < new_m->cols; j++)
+            basis_count++;
+            for (int k = 0; k < cols; k++)
             {
-                int temp = get_value(new_m, i, j);
-                matrix_insert(new_m, i, j, get_value(new_m, pivot_row, j));
-                matrix_insert(new_m, pivot_row, j, temp);
-            }
-        }
-
-        // row reduce the current row
-        for (int j = 0; j < new_m->rows; j++)
-        {
-            if (i == j)
-                continue;
-
-            if (get_value(new_m, j, i) != 0)
-            {
-                // this works for the general case (despite only working in mod 2)
-                int multiple = lcm(get_value(new_m, j, i), get_value(new_m, i, i));
-                int factor1 = multiple / get_value(new_m, i, i);
-                int factor2 = multiple / get_value(new_m, j, i);
-                for (int k = i; k < new_m->cols; k++)
+                if (k != i && get_value(new_m, pivot_pos, k) != 0)
                 {
-                    matrix_insert(new_m, j, k, get_value(new_m, j, k) * factor2 - get_value(new_m, i, k) * factor1);
+                    // reduce this current column (k)
+                    for (int j = 0; j < rows; j++)
+                    {
+                        matrix_add(new_m, j, k, get_value(new_m, j, i));
+                    }
                 }
             }
         }
     }
 
-    struct Matrix *result = matrix_init(m->rows, pivots);
-    int count = 0;
-    for (int row = 0; row < m->rows; row++)
+    // extract the basis
+    struct Matrix *basis = matrix_init(basis_count, cols);
+    int index = 0;
+    for (int i = 0; i < cols; i++)
     {
-        for (int col = 0; col < m->rows; col++)
+        int row_index = -1;
+
+        for (int j = 0; j < rows; j++)
         {
-            if (get_value(new_m, row, col) != 0)
+            if (get_value(new_m, j, i) != 0)
             {
-                for (int i = 0; i < m->rows; i++)
-                {
-                    matrix_insert(result, i, count, get_value(m, i, col));
-                }
-                count++;
+                row_index = j;
                 break;
             }
+        }
+
+        if (row_index != -1)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                matrix_insert(basis, index, j, get_value(m, row_index, j));
+            }
+            index++;
         }
     }
 
     free(new_m);
-
-    return result;
+    return basis;
 }
