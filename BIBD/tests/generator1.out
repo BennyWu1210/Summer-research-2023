@@ -13,3 +13,11 @@ columns: 8
 1 0 0 0 1 0 1 1 
 0 1 0 0 1 1 0 1 
 1 0 0 1 0 1 0 1 
+File opened successfully: ./tests/classification/file1.txt
+File opened successfully: ./tests/classification/file2.txt
+File opened successfully: ./tests/classification/file3.txt
+File opened successfully: ./tests/classification/file4.txt
+File opened successfully: ./tests/classification/file5.txt
+File opened successfully: ./tests/classification/file6.txt
+File opened successfully: ./tests/classification/file7.txt
+File opened successfully: ./tests/classification/file8.txt
